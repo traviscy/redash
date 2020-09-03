@@ -86,7 +86,6 @@ function runCypressCI() {
   );
 }
 
-process.env.NODE_ENV = "test";
 const command = process.argv[2] || "all";
 
 switch (command) {
