@@ -5,7 +5,7 @@
   "main": "dist/redash-visualizations.js",
   "scripts": {
     "clean": "rm -rf lib dist",
-    "build:babel": "babel src --out-dir lib --source-maps --ignore 'src/**/*.test.js' --copy-files --no-copy-ignored",
+    "build:babel": "NODE_ENV=test babel src --out-dir lib --source-maps --ignore 'src/**/*.test.js' --copy-files --no-copy-ignored",
     "build:webpack": "webpack",
     "build": " NODE_ENV=test npm-run-all clean build:babel build:webpack",
     "watch:babel": "babel src --watch --out-dir lib --source-maps --ignore 'src/**/*.test.js' --copy-files --no-copy-ignored",
