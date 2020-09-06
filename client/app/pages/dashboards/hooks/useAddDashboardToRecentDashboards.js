@@ -18,10 +18,10 @@ export default function useAddDashboardToRecentDashboards(dashboardId) {
       find(parsedCurrentRecentDashboards, recentDashboard => recentDashboard.id === dashboardId) !== undefined;
     const biggestPriorityValue = reduce(currentRecentDashboardsPrioritys, (a, b) => Math.max(a, b));
     let dashboardsToSave;
-    if(recentDashboardsIncludesCurrentDashboard) {
+    if (recentDashboardsIncludesCurrentDashboard) {
       dashboardsToSave = map(parsedCurrentRecentDashboards, recentDashboard =>
         recentDashboard.id === dashboardId ? { id: dashboardId, priority: biggestPriorityValue + 1 } : recentDashboard
-      )
+      );
     } else {
       parsedCurrentRecentDashboards.push({ id: dashboardId, priority: biggestPriorityValue + 1 });
       dashboardsToSave = parsedCurrentRecentDashboards;

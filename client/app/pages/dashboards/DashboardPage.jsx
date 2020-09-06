@@ -19,7 +19,7 @@ import url from "@/services/url";
 import useImmutableCallback from "@/lib/hooks/useImmutableCallback";
 
 import useDashboard from "./hooks/useDashboard";
-import useAddDashboardToRecentDashboards from './hooks/useAddDashboardToRecentDashboards';
+import useAddDashboardToRecentDashboards from "./hooks/useAddDashboardToRecentDashboards";
 import DashboardHeader from "./components/DashboardHeader";
 
 import "./DashboardPage.less";
@@ -165,7 +165,7 @@ function DashboardPage({ dashboardSlug, dashboardId, onError }) {
       })
       .catch(handleError);
   }, [dashboardId, dashboardSlug, handleError]);
-  
+
   useEffect(() => {
     addDashboardToRecentDashboards();
   }, [addDashboardToRecentDashboards]);

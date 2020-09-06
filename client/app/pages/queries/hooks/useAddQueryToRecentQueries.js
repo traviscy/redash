@@ -14,10 +14,10 @@ export default function useAddQueryToRecentQueries(query) {
       find(parsedCurrentRecentQueries, recentQuery => recentQuery.id === query.id) !== undefined;
     const biggestPriorityValue = reduce(currentRecentQueriesPrioritys, (a, b) => Math.max(a, b));
     let queriesToSave;
-    if(recentQueriesIncludesCurrentQuery) {
+    if (recentQueriesIncludesCurrentQuery) {
       queriesToSave = map(parsedCurrentRecentQueries, recentQuery =>
         recentQuery.id === query.id ? { id: query.id, priority: biggestPriorityValue + 1 } : recentQuery
-      )
+      );
     } else {
       parsedCurrentRecentQueries.push({ id: query.id, priority: biggestPriorityValue + 1 });
       queriesToSave = parsedCurrentRecentQueries;
