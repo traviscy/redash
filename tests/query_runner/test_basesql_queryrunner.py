@@ -1,3 +1,4 @@
+import hashlib
 import unittest
 
 from redash.query_runner import BaseSQLQueryRunner, BaseQueryRunner
@@ -82,6 +83,13 @@ class TestBaseSQLQueryRunner(unittest.TestCase):
         origin_query_text = "select * from raw_events -- comment"
         query_text = self.query_runner.apply_auto_limit(origin_query_text, True)
         self.assertEqual("select * from raw_events LIMIT 1000", query_text)
+
+    def test_gen_query_hash_databricks(self):
+        origin_query_text = "select *"
+        expected_query_text = "select * LIMIT 1000"
+        base_runner = BaseQueryRunner({})
+        self.assertEqual(base_runner.gen_query_hash(expected_query_text),
+                         self.query_runner.gen_query_hash(origin_query_text, True))
 
 
 if __name__ == '__main__':

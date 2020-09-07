@@ -4,11 +4,13 @@ from unittest import TestCase
 
 import pytz
 from dateutil.parser import parse as date_parse
+
+from redash.query_runner import BaseQueryRunner
 from tests import BaseTestCase
 
 from redash import models, redis_connection
 from redash.models import db, types
-from redash.utils import gen_query_hash, utcnow
+from redash.utils import utcnow
 
 
 class DashboardTest(BaseTestCase):
@@ -471,6 +473,37 @@ class TestQueryAll(BaseTestCase):
         qs2 = base.order_by(models.User.name.desc())
         self.assertEqual(["bob", "alice"], [q.user.name for q in qs2])
 
+    def test_update_query_hash_basesql_with_options(self):
+        ds = self.factory.create_data_source(
+            group=self.factory.org.default_group, type="databricks"
+        )
+        query = self.factory.create_query(query_text="SELECT 2", data_source=ds)
+        query.options = {"apply_auto_limit": True}
+        origin_hash = query.query_hash
+        query.update_query_hash()
+        self.assertNotEqual(origin_hash, query.query_hash)
+
+    def test_update_query_hash_basesql_no_options(self):
+        ds = self.factory.create_data_source(
+            group=self.factory.org.default_group, type="databricks"
+        )
+        query = self.factory.create_query(query_text="SELECT 2", data_source=ds)
+        query.options = {}
+        origin_hash = query.query_hash
+        query.update_query_hash()
+        self.assertEqual(origin_hash, query.query_hash)
+
+    def test_update_query_hash_non_basesql(self):
+        ds = self.factory.create_data_source(
+            group=self.factory.org.default_group, type="druid"
+        )
+        query = self.factory.create_query(query_text="SELECT 2", data_source=ds)
+        query.options = {"apply_auto_limit": True}
+        origin_hash = query.query_hash
+        query.update_query_hash()
+        self.assertEqual(origin_hash, query.query_hash)
+
+
 
 class TestGroup(BaseTestCase):
     def test_returns_groups_with_specified_names(self):
@@ -498,7 +531,7 @@ class TestQueryResultStoreResult(BaseTestCase):
         super(TestQueryResultStoreResult, self).setUp()
         self.data_source = self.factory.data_source
         self.query = "SELECT 1"
-        self.query_hash = gen_query_hash(self.query)
+        self.query_hash = BaseQueryRunner({}).gen_query_hash(self.query)
         self.runtime = 123
         self.utcnow = utcnow()
         self.data = '{"a": 1}'

@@ -1,7 +1,8 @@
+from redash.query_runner import BaseQueryRunner
 from tests import BaseTestCase
 import datetime
 from redash.models import Query, QueryResult, Group, Event, db
-from redash.utils import utcnow, gen_query_hash
+from redash.utils import utcnow
 import mock
 
 
@@ -448,7 +449,7 @@ class TestQueryUpdateLatestResult(BaseTestCase):
         super(TestQueryUpdateLatestResult, self).setUp()
         self.data_source = self.factory.data_source
         self.query = "SELECT 1"
-        self.query_hash = gen_query_hash(self.query)
+        self.query_hash = BaseQueryRunner({}).gen_query_hash(self.query)
         self.runtime = 123
         self.utcnow = utcnow()
         self.data = "data"

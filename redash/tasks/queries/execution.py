@@ -8,11 +8,11 @@ from rq.timeouts import JobTimeoutException
 from rq.exceptions import NoSuchJobError
 
 from redash import models, redis_connection, settings
-from redash.query_runner import InterruptException
+from redash.query_runner import InterruptException, BaseQueryRunner
 from redash.tasks.worker import Queue, Job
 from redash.tasks.alerts import check_alerts_for_query
 from redash.tasks.failure_report import track_failure
-from redash.utils import gen_query_hash, json_dumps, utcnow
+from redash.utils import json_dumps, utcnow
 from redash.worker import get_job_logger
 
 logger = get_job_logger(__name__)
@@ -30,7 +30,9 @@ def _unlock(query_hash, data_source_id):
 def enqueue_query(
     query, data_source, user_id, is_api_key=False, scheduled_query=None, metadata={}
 ):
-    query_hash = gen_query_hash(query)
+    # choose not to use its own data_source because it's possible
+    # for it to be None
+    query_hash = BaseQueryRunner({}).gen_query_hash(query, False)
     logger.info("Inserting job for %s with metadata=%s", query_hash, metadata)
     try_count = 0
     job = None
@@ -161,7 +163,7 @@ class QueryExecutor(object):
 
         # Close DB connection to prevent holding a connection for a long time while the query is executing.
         models.db.session.close()
-        self.query_hash = gen_query_hash(self.query)
+        self.query_hash = BaseQueryRunner({}).gen_query_hash(self.query, False)
         self.scheduled_query = scheduled_query
         # Load existing tracker or create a new one if the job was created before code update:
         if scheduled_query:

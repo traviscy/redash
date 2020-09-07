@@ -1,3 +1,4 @@
+import hashlib
 import logging
 
 from contextlib import ExitStack
@@ -10,7 +11,7 @@ from urllib.parse import urlparse
 from six import text_type
 from sshtunnel import open_tunnel
 from redash import settings
-from redash.utils import json_loads, query_is_select_no_limit, add_limit_to_query
+from redash.utils import json_loads, query_is_select_no_limit, add_limit_to_query, COMMENTS_REGEX
 from rq.timeouts import JobTimeoutException
 
 from redash.utils.requests_session import requests, requests_session
@@ -196,6 +197,19 @@ class BaseQueryRunner(object):
 
     def apply_auto_limit(self, query_text, set_auto_limit):
         return query_text
+
+    def gen_query_hash(self, query_text, set_auto_limit=False):
+        """Return hash of the given query after stripping all comments, line breaks
+        and multiple spaces, and lower casing all text.
+
+        TODO: possible issue - the following queries will get the same id:
+            1. SELECT 1 FROM table WHERE column='Value';
+            2. SELECT 1 FROM table where column='value';
+        """
+        query_text = self.apply_auto_limit(query_text, set_auto_limit)
+        sql = COMMENTS_REGEX.sub("", query_text)
+        sql = "".join(sql.split()).lower()
+        return hashlib.md5(sql.encode("utf-8")).hexdigest()
 
 
 class BaseSQLQueryRunner(BaseQueryRunner):

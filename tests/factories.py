@@ -2,7 +2,8 @@ from passlib.apps import custom_app_context as pwd_context
 import redash.models
 from redash.models import db
 from redash.permissions import ACCESS_TYPE_MODIFY
-from redash.utils import gen_query_hash, utcnow
+from redash.query_runner import BaseQueryRunner
+from redash.utils import utcnow
 from redash.utils.configuration import ConfigurationContainer
 
 
@@ -125,7 +126,7 @@ query_result_factory = ModelFactory(
     runtime=1,
     retrieved_at=utcnow,
     query_text="SELECT 1",
-    query_hash=gen_query_hash("SELECT 1"),
+    query_hash=BaseQueryRunner({}).gen_query_hash("SELECT 1"),
     data_source=data_source_factory.create,
     org_id=1,
 )
